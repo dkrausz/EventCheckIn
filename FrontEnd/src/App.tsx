@@ -52,7 +52,6 @@ function App() {
                 console.log("Login Failed");
               }}
             />
-            ;
           </div>
         </div>
       </form>
