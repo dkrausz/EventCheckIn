@@ -17,11 +17,9 @@ const facebookId = import.meta.env.VITE_FACEBOOK_AUTH_ID as string;
 export function RegisterPage() {
   const googleLogin = useGoogleLogin({
     onSuccess: async (credentialResponse) => {
-      console.log("credentials", credentialResponse);
-
       try {
-        const data = await eventApi.post(
-          "/auth/google",
+        await eventApi.post(
+          "/user/register/google",
           {},
           {
             headers: {
@@ -29,23 +27,27 @@ export function RegisterPage() {
             },
           }
         );
-        console.log(data);
       } catch (error) {
         console.log(error);
       }
     },
-
-    //     fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-    //       headers: {
-    //         Authorization: `Bearer ${credentialResponse.access_token}`,
-    //       },
-    //     })
-    //       .then((res) => res.json())
-    //       .then((userInfo) => {
-    //         console.log(userInfo);
-    //       });
-    //   },
   });
+
+  const facebookRegister = async (token: string) => {
+    try {
+      await eventApi.post(
+        "/user/register/facebook",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const {
     register,
@@ -55,8 +57,20 @@ export function RegisterPage() {
 
   type TRegister = z.infer<typeof registerSchema>;
 
-  const handleOnSubmit = (userData: TRegister) => {
-    console.log(userData);
+  const handleOnSubmit = async (userData: TRegister) => {
+    const user = {
+      name: userData.name,
+      email: userData.email,
+      password: userData.password,
+      provider: "local",
+      providerID: null,
+    };
+    try {
+      const data = await eventApi.post("/user/register/local", user);
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -79,13 +93,10 @@ export function RegisterPage() {
             <FacebookLogin
               appId={facebookId}
               onSuccess={(response) => {
-                console.log("Login Success!", response);
+                facebookRegister(response.accessToken);
               }}
               onFail={(error) => {
                 console.log("Login Failed!", error);
-              }}
-              onProfileSuccess={(response) => {
-                console.log("Get Profile Success!", response);
               }}
               render={({ onClick }) => <img src={faceBookLogo} onClick={onClick} alt="" />}
             />

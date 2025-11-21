@@ -10,24 +10,24 @@ class GoogleOauthMiddleware {
 
   public getUserInformation = async (req: Request, res: Response, next: NextFunction) => {
     const googleToken = req.headers.authorization;
-    console.log("token", googleToken);
+
     if (!googleToken) {
       throw new AppError(401, "Token is required!");
     }
 
-    const response = await this.googleAPI.get("/userinfo", {
+    const userDate = await this.googleAPI.get("/userinfo", {
       headers: {
         Authorization: googleToken,
       },
     });
-    console.log("resposta", response);
-    const user = response.data;
+
+    const user = userDate.data;
     req.body = {
       name: user.name,
       email: user.email,
       password: null,
       provider: "google",
-      idProvider: user.sub,
+      providerID: user.sub,
     };
 
     return next();

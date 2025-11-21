@@ -4,7 +4,7 @@ const baseSchema = z.object({
   id: z.string(),
   name: z.string().min(1),
   email: z.email().min(1),
-  idProvider: z.string().nullable(),
+  providerID: z.string().nullable(),
 });
 
 const localSchema = baseSchema.extend({
